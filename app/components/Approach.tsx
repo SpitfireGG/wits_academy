@@ -1,18 +1,24 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Reveal } from "./Reveal";
 
-// ── Geometry (SVG user space 800×800) ────────────────────────────
-const CX = 400;
-const CY = 400;
-const R = 205;
+// ── Fixed design stage; scaled to fit any width so mobile === desktop ──
+const STAGE_W = 1020;
+const STAGE_H = 770;
+const CX = 500;
+const CY = 375;
+const R = 185;
+const NODE_R = 23;
+const CARD_HW = 111; // card half-width
+const CARD_HH = 62; // card half-height (approx)
+
 const pt = (deg: number): [number, number] => {
   const r = (deg * Math.PI) / 180;
   return [CX + R * Math.cos(r), CY - R * Math.sin(r)];
 };
 
-// Open arc: 72° → 372° (gap at top-right), traversing all five nodes.
 const arcPath = (() => {
   const A0 = 72;
   const A1 = 372;
@@ -35,14 +41,27 @@ type Step = {
 };
 
 const steps: Step[] = [
-  { num: "1", title: "Foundation", desc: "Early years built on care, play and the joy of first discoveries.", node: pt(72), card: [706, 150] },
-  { num: "2", title: "Discovery", desc: "Hands-on, project-based learning that turns questions into understanding.", node: pt(147), card: [64, 232] },
-  { num: "3", title: "Mastery", desc: "Academic rigour and the discipline that leads to SEE and +2 excellence.", node: pt(222), card: [96, 742] },
-  { num: "4", title: "Character", desc: "Empathy, integrity and leadership woven into everyday school life.", node: pt(297), card: [664, 748] },
-  { num: "5", title: "Future", desc: "Guidance toward top universities, careers and a life of contribution.", node: pt(12), card: [776, 452] },
+  { num: "1", title: "Foundation", desc: "Early years built on care, play and the joy of first discoveries.", node: pt(72), card: [557, 78] },
+  { num: "2", title: "Discovery", desc: "Hands-on, project-based learning that turns questions into understanding.", node: pt(147), card: [118, 250] },
+  { num: "3", title: "Mastery", desc: "Academic rigour and the discipline that leads to SEE and +2 excellence.", node: pt(222), card: [214, 662] },
+  { num: "4", title: "Character", desc: "Empathy, integrity and leadership woven into everyday school life.", node: pt(297), card: [722, 678] },
+  { num: "5", title: "Future", desc: "Guidance toward top universities, careers and a life of contribution.", node: pt(12), card: [902, 228] },
 ];
 
-const pct = (v: number) => `${(v / 800) * 100}%`;
+// Wire endpoints: a dot just outside the node and a dot just outside the card
+// (the line never touches the card).
+function connector([nx, ny]: [number, number], [cx, cy]: [number, number]) {
+  const dx = cx - nx;
+  const dy = cy - ny;
+  const len = Math.hypot(dx, dy) || 1;
+  const ux = dx / len;
+  const uy = dy / len;
+  const start: [number, number] = [nx + (NODE_R + 4) * ux, ny + (NODE_R + 4) * uy];
+  const t = Math.min(CARD_HW / (Math.abs(dx) || 1e-6), CARD_HH / (Math.abs(dy) || 1e-6));
+  const edge: [number, number] = [cx - t * dx, cy - t * dy];
+  const end: [number, number] = [edge[0] - 13 * ux, edge[1] - 13 * uy];
+  return { start, end };
+}
 
 const nodeStyle: React.CSSProperties = {
   background: "radial-gradient(circle at 50% 32%, #8b908c 0%, #4c514e 55%, #2b2f2d 100%)",
@@ -51,6 +70,19 @@ const nodeStyle: React.CSSProperties = {
 };
 
 export function Approach() {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      setScale(Math.min(el.clientWidth / STAGE_W, 1));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   return (
     <section id="approach" className="relative overflow-hidden bg-paper-2 py-20 sm:py-28">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
@@ -71,13 +103,31 @@ export function Approach() {
           </Reveal>
         </div>
 
-        {/* ── 3D tube diagram (xl+) ── */}
-        <div className="mt-4 hidden xl:block">
-          <div className="relative mx-auto aspect-square w-full max-w-[780px]">
-            {/* SVG: tube + dotted connectors (behind the HTML) */}
-            <svg viewBox="0 0 800 800" className="absolute inset-0 h-full w-full overflow-visible">
+        {/* Scalable stage — identical layout on every screen */}
+        <div
+          ref={wrapRef}
+          className="relative mx-auto mt-6 w-full max-w-[1020px]"
+          style={{ height: STAGE_H * scale }}
+        >
+          <div
+            className="absolute left-1/2 top-0"
+            style={{
+              width: STAGE_W,
+              height: STAGE_H,
+              transform: `translateX(-50%) scale(${scale})`,
+              transformOrigin: "top center",
+            }}
+          >
+            {/* SVG: tube, wires, dots */}
+            <svg
+              width={STAGE_W}
+              height={STAGE_H}
+              viewBox={`0 0 ${STAGE_W} ${STAGE_H}`}
+              className="pointer-events-none absolute inset-0 overflow-visible"
+              aria-hidden
+            >
               <defs>
-                <linearGradient id="tube-face" x1="0" y1="80" x2="0" y2="720" gradientUnits="userSpaceOnUse">
+                <linearGradient id="tube-face" x1="0" y1="150" x2="0" y2="660" gradientUnits="userSpaceOnUse">
                   <stop offset="0" stopColor="#f4f3ef" />
                   <stop offset="0.5" stopColor="#d6d4cc" />
                   <stop offset="1" stopColor="#adaba1" />
@@ -87,26 +137,34 @@ export function Approach() {
                 </filter>
               </defs>
 
-              {/* dotted connectors */}
-              {steps.map((s, i) => (
-                <motion.line
-                  key={s.num}
-                  x1={s.node[0]}
-                  y1={s.node[1]}
-                  x2={s.card[0]}
-                  y2={s.card[1]}
-                  stroke="rgba(22,25,26,0.5)"
-                  strokeWidth={2.5}
-                  strokeLinecap="round"
-                  strokeDasharray="2 7"
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.9 + i * 0.12 }}
-                />
-              ))}
+              {/* wires + end dots */}
+              {steps.map((s, i) => {
+                const { start, end } = connector(s.node, s.card);
+                return (
+                  <motion.g
+                    key={s.num}
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: 0.9 + i * 0.12 }}
+                  >
+                    <line
+                      x1={start[0]}
+                      y1={start[1]}
+                      x2={end[0]}
+                      y2={end[1]}
+                      stroke="rgba(22,25,26,0.5)"
+                      strokeWidth={2.5}
+                      strokeLinecap="round"
+                      strokeDasharray="2 8"
+                    />
+                    <circle cx={start[0]} cy={start[1]} r={6} fill="#2b2f2d" />
+                    <circle cx={end[0]} cy={end[1]} r={6} fill="#2b2f2d" />
+                  </motion.g>
+                );
+              })}
 
-              {/* tube — base */}
+              {/* tube base */}
               <motion.path
                 d={arcPath}
                 fill="none"
@@ -117,9 +175,9 @@ export function Approach() {
                 initial={{ pathLength: 0 }}
                 whileInView={{ pathLength: 1 }}
                 viewport={{ once: true }}
-                transition={{ duration: 1.7, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
               />
-              {/* tube — specular highlight */}
+              {/* tube highlight */}
               <motion.path
                 d={arcPath}
                 fill="none"
@@ -130,12 +188,15 @@ export function Approach() {
                 initial={{ pathLength: 0 }}
                 whileInView={{ pathLength: 1 }}
                 viewport={{ once: true }}
-                transition={{ duration: 1.7, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
               />
             </svg>
 
             {/* Center content */}
-            <div className="absolute left-1/2 top-1/2 w-48 -translate-x-1/2 -translate-y-1/2 text-center">
+            <div
+              className="absolute text-center"
+              style={{ left: CX, top: CY, width: 210, transform: "translate(-50%,-50%)" }}
+            >
               <p className="eyebrow text-forest-600">Our approach</p>
               <p className="mt-2 font-display text-xl font-bold leading-tight text-ink">
                 Every stage, with intention.
@@ -146,8 +207,15 @@ export function Approach() {
             {steps.map((s) => (
               <div
                 key={s.num}
-                className="absolute grid h-12 w-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full font-display text-lg font-semibold text-white"
-                style={{ left: pct(s.node[0]), top: pct(s.node[1]), ...nodeStyle }}
+                className="absolute grid place-items-center rounded-full font-display text-lg font-semibold text-white"
+                style={{
+                  left: s.node[0],
+                  top: s.node[1],
+                  width: NODE_R * 2,
+                  height: NODE_R * 2,
+                  transform: "translate(-50%,-50%)",
+                  ...nodeStyle,
+                }}
               >
                 {s.num}
               </div>
@@ -155,40 +223,24 @@ export function Approach() {
 
             {/* Cards */}
             {steps.map((s, i) => (
-              <motion.div
+              <div
                 key={s.num}
-                className="absolute w-48 -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-5 shadow-[0_1px_2px_rgba(22,25,26,0.04),0_24px_50px_-24px_rgba(22,25,26,0.45)] ring-1 ring-black/[0.03]"
-                style={{ left: pct(s.card[0]), top: pct(s.card[1]) }}
-                initial={{ opacity: 0, y: 16, scale: 0.96 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.55, delay: 0.5 + i * 0.12, ease: [0.22, 1, 0.36, 1] }}
+                className="absolute"
+                style={{ left: s.card[0], top: s.card[1], width: 222, transform: "translate(-50%,-50%)" }}
               >
-                <h3 className="font-display text-base font-bold text-ink">{s.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">{s.desc}</p>
-              </motion.div>
+                <motion.div
+                  className="rounded-2xl bg-white p-5 shadow-[0_1px_2px_rgba(22,25,26,0.04),0_24px_50px_-24px_rgba(22,25,26,0.45)] ring-1 ring-black/[0.03]"
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.4 + i * 0.12, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <h3 className="font-display text-base font-bold text-ink">{s.title}</h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">{s.desc}</p>
+                </motion.div>
+              </div>
             ))}
           </div>
-        </div>
-
-        {/* ── Vertical stepper (below xl) ── */}
-        <div className="mt-12 xl:hidden">
-          <ol className="relative mx-auto max-w-xl space-y-6 before:absolute before:left-[23px] before:top-4 before:h-[calc(100%-2rem)] before:w-px before:bg-line">
-            {steps.map((s, i) => (
-              <Reveal as="li" key={s.num} delay={i * 0.06} className="relative flex gap-5">
-                <div
-                  className="relative z-10 grid h-12 w-12 shrink-0 place-items-center rounded-full font-display text-lg font-semibold text-white"
-                  style={nodeStyle}
-                >
-                  {s.num}
-                </div>
-                <div className="flex-1 rounded-2xl bg-white p-5 shadow-[0_1px_2px_rgba(22,25,26,0.04),0_20px_40px_-24px_rgba(22,25,26,0.4)] ring-1 ring-black/[0.03]">
-                  <h3 className="font-display text-lg font-bold text-ink">{s.title}</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">{s.desc}</p>
-                </div>
-              </Reveal>
-            ))}
-          </ol>
         </div>
       </div>
     </section>

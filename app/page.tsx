@@ -11,6 +11,8 @@ import { CampusLife } from "./components/CampusLife";
 import { Testimonials } from "./components/Testimonials";
 import { CtaContact } from "./components/CtaContact";
 import { Footer } from "./components/Footer";
+import { AnnouncementWidget } from "./components/AnnouncementWidget";
+import { ChatWidget } from "./components/ChatWidget";
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -48,6 +50,8 @@ export default function Home() {
         <CtaContact />
       </main>
       <Footer />
+      <AnnouncementWidget />
+      <ChatWidget />
     </>
   );
 }

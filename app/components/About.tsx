@@ -3,9 +3,21 @@ import { Reveal } from "./Reveal";
 import { TorchIcon, GlobeIcon, ShieldIcon } from "./icons";
 
 const pillars = [
-  { icon: TorchIcon, title: "Knowledge", desc: "The torch of learning that lights every path." },
-  { icon: GlobeIcon, title: "Civilization", desc: "Global citizens rooted in community." },
-  { icon: ShieldIcon, title: "Character", desc: "Integrity and empathy in daily life." },
+  {
+    icon: TorchIcon,
+    title: "Knowledge",
+    desc: "The torch of learning that lights every path.",
+  },
+  {
+    icon: GlobeIcon,
+    title: "Civilization",
+    desc: "Global citizens rooted in community.",
+  },
+  {
+    icon: ShieldIcon,
+    title: "Character",
+    desc: "Integrity and empathy in daily life.",
+  },
 ];
 
 export function About() {
@@ -24,19 +36,6 @@ export function About() {
                 className="object-cover"
               />
             </div>
-            <div className="node-card absolute -right-4 bottom-6 flex items-center gap-3 rounded-2xl p-4 sm:-right-8">
-              <Image
-                src="/schoollogo.jpg"
-                alt="WITS crest"
-                width={44}
-                height={44}
-                className="h-11 w-11 object-contain"
-              />
-              <div>
-                <p className="font-display text-sm font-bold text-ink">Education</p>
-                <p className="text-xs text-forest-600">for Civilization</p>
-              </div>
-            </div>
           </Reveal>
 
           {/* Copy */}
@@ -52,10 +51,10 @@ export function About() {
             <Reveal delay={0.1}>
               <p className="mt-6 max-w-lg text-lg leading-relaxed text-ink-soft">
                 For over two decades in Baudha, Kathmandu, WITS Academy has
-                believed that education is more than exams — it is the foundation
-                of a thoughtful, compassionate society. Every symbol in our
-                crest, from the torch of knowledge to the globe of citizenship,
-                carries that promise forward.
+                believed that education is more than exams — it is the
+                foundation of a thoughtful, compassionate society. Every symbol
+                in our crest, from the torch of knowledge to the globe of
+                citizenship, carries that promise forward.
               </p>
             </Reveal>
 

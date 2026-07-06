@@ -137,3 +137,18 @@ export const CheckIcon: Icon = (p) => (
     <path d="M4 12.5 9 17.5 20 6.5" />
   </svg>
 );
+
+export const MegaphoneIcon: Icon = (p) => (
+  <svg {...base} {...p}>
+    <path d="M4 10v4a1.5 1.5 0 0 0 1.5 1.5H7l8 4V4.5L7 8.5H5.5A1.5 1.5 0 0 0 4 10Z" />
+    <path d="M7 15.5v2.7a1.7 1.7 0 0 0 3.4.4" />
+    <path d="M18.5 9.5a3.2 3.2 0 0 1 0 5" />
+  </svg>
+);
+
+export const ChatIcon: Icon = (p) => (
+  <svg {...base} {...p}>
+    <path d="M21 14.5a2 2 0 0 1-2 2H8l-4 4V6a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2Z" />
+    <path d="M8.5 10h7M8.5 13h4" />
+  </svg>
+);
