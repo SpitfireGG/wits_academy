@@ -243,12 +243,9 @@ export function Hero() {
   const reduce = useReducedMotion();
   const [enhanced, setEnhanced] = useState(false);
 
+  // Animate on every screen size; only reduced-motion users get the static hero.
   useEffect(() => {
-    const mq = window.matchMedia("(min-width: 768px)");
-    const apply = () => setEnhanced(!reduce && mq.matches);
-    apply();
-    mq.addEventListener("change", apply);
-    return () => mq.removeEventListener("change", apply);
+    setEnhanced(!reduce);
   }, [reduce]);
 
   return enhanced ? <ScrollHero /> : <StaticHero />;
