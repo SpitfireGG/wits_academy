@@ -41,7 +41,7 @@ type Step = {
 };
 
 const steps: Step[] = [
-  { num: "1", title: "Foundation", desc: "Early years built on care, play and the joy of first discoveries.", node: pt(72), card: [557, 78] },
+  { num: "1", title: "Foundation", desc: "Early years built on care, play and the joy of first discoveries.", node: pt(72), card: [557, 40] },
   { num: "2", title: "Discovery", desc: "Hands-on, project-based learning that turns questions into understanding.", node: pt(147), card: [118, 250] },
   { num: "3", title: "Mastery", desc: "Academic rigour and the discipline that leads to SEE and +2 excellence.", node: pt(222), card: [214, 662] },
   { num: "4", title: "Character", desc: "Empathy, integrity and leadership woven into everyday school life.", node: pt(297), card: [722, 678] },
@@ -153,13 +153,13 @@ export function Approach() {
                       y1={start[1]}
                       x2={end[0]}
                       y2={end[1]}
-                      stroke="rgba(22,25,26,0.5)"
+                      stroke="rgba(146,136,122,0.7)"
                       strokeWidth={2.5}
                       strokeLinecap="round"
                       strokeDasharray="2 8"
                     />
-                    <circle cx={start[0]} cy={start[1]} r={6} fill="#2b2f2d" />
-                    <circle cx={end[0]} cy={end[1]} r={6} fill="#2b2f2d" />
+                    <circle cx={start[0]} cy={start[1]} r={6} fill="#9c9284" />
+                    <circle cx={end[0]} cy={end[1]} r={6} fill="#9c9284" />
                   </motion.g>
                 );
               })}
