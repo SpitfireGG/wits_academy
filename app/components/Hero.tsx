@@ -4,8 +4,8 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import {
   motion,
+  useMotionValue,
   useReducedMotion,
-  useScroll,
   useTransform,
 } from "framer-motion";
 import { ArrowIcon } from "./icons";
@@ -148,18 +148,40 @@ function HeroCopy({ onDark = false }: { onDark?: boolean }) {
 
 function ScrollHero() {
   const ref = useRef<HTMLElement>(null);
-  const { scrollYProgress: p } = useScroll({
-    target: ref,
-    offset: ["start start", "end end"],
-  });
+  // Progress computed manually from the section's position — monotonic and
+  // identical on mobile and desktop (framer's useScroll+sticky drifts here).
+  const p = useMotionValue(0);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let raf = 0;
+    const update = () => {
+      const rect = el.getBoundingClientRect();
+      const total = el.offsetHeight - window.innerHeight;
+      const prog = total > 0 ? Math.min(1, Math.max(0, -rect.top / total)) : 0;
+      p.set(prog);
+    };
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      cancelAnimationFrame(raf);
+    };
+  }, [p]);
 
-  const heroOpacity = useTransform(p, [0, 0.24], [1, 0]);
-  const heroY = useTransform(p, [0, 0.24], [0, -110]);
-  const bScale = useTransform(p, [0, 1], [1, 3.9]);
+  const heroOpacity = useTransform(p, [0, 0.18], [1, 0]);
+  const heroY = useTransform(p, [0, 0.18], [0, -110]);
+  const bScale = useTransform(p, [0, 0.85], [1, 3.6]);
   const cloudNearY = useTransform(p, [0, 1], [0, 170]);
-  const outlineOpacity = useTransform(p, [0.32, 0.48, 0.62], [0, 1, 0]);
-  const maskOpacity = useTransform(p, [0.5, 0.8], [0, 1]);
-  const hintOpacity = useTransform(p, [0, 0.07], [1, 0]);
+  const outlineOpacity = useTransform(p, [0.26, 0.42, 0.6], [0, 1, 0]);
+  const maskOpacity = useTransform(p, [0.46, 0.72], [0, 1]);
+  const hintOpacity = useTransform(p, [0, 0.06], [1, 0]);
 
   return (
     <section id="top" ref={ref} className="relative h-[350vh]">
